@@ -1,0 +1,18 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Runtime data (contains client names / rep info)
+run_history.json
+commission_config.json
+
+# OS
+.DS_Store
+
+# Claude internal
+.claude/
+
+# ngrok
+*.log

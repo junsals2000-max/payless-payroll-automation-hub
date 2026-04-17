@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Payless Automation Hub</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img class="brand-logo" src="https://paylesskitchencabinets.com/wp-content/uploads/2021/07/Untitled-design-e1745405124506.png" alt="Payless Logo" />
+      <div class="brand-text">
+        <span class="brand-name">Automation Hub</span>
+        <span class="brand-sub">Payless Kitchens &amp; Baths</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="showView('dashboard')" id="nav-dashboard">
+        <span class="nav-icon">⊞</span> Dashboard
+      </button>
+      <div class="nav-section-label">Modules</div>
+      <button class="nav-item" onclick="openModule('rehash')" id="nav-rehash">
+        <span class="nav-icon">📊</span> Sales Report
+      </button>
+      <button class="nav-item nav-disabled" id="nav-coordinator">
+        <span class="nav-icon">📋</span> Project Coordinator
+        <span class="nav-badge">Soon</span>
+      </button>
+      <button class="nav-item nav-disabled" id="nav-marketing">
+        <span class="nav-icon">📣</span> Marketing Report
+        <span class="nav-badge">Soon</span>
+      </button>
+      <button class="nav-item nav-disabled" id="nav-scheduling">
+        <span class="nav-icon">📅</span> Scheduling Report
+        <span class="nav-badge">Soon</span>
+      </button>
+      <button class="nav-item nav-disabled" id="nav-recruiting">
+        <span class="nav-icon">🤝</span> Recruiting Report
+        <span class="nav-badge">Soon</span>
+      </button>
+      <button class="nav-item" onclick="openModule('commission')" id="nav-commission">
+        <span class="nav-icon">💵</span> Sales Commission
+      </button>
+      <button class="nav-item" onclick="openModule('commission_estimate')" id="nav-commission_estimate">
+        <span class="nav-icon">📈</span> Commission Estimate
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="chrome-pill" id="chromePill">
+        <span class="chrome-dot" id="chromeDot"></span>
+        <span id="chromeLabel">Automation Chrome</span>
+      </div>
+      <button class="settings-btn" onclick="openSettings()" title="User Settings">⚙ Settings</button>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN ══ -->
+  <div class="main-wrap">
+
+    <!-- ── Dashboard view ── -->
+    <div id="view-dashboard" class="view active-view">
+      <header class="topbar">
+        <div>
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-sub" id="greetingLine">Welcome back</p>
+        </div>
+        <div class="topbar-right">
+          <div class="date-chip" id="dateChip"></div>
+        </div>
+      </header>
+
+      <!-- Stats row -->
+      <div class="stats-row" id="statsRow">
+        <div class="stat-card">
+          <div class="stat-val" id="statTotal">—</div>
+          <div class="stat-label">Total Runs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val green" id="statSuccess">—</div>
+          <div class="stat-label">Successful</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="statModules">7</div>
+          <div class="stat-label">Modules</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val blue" id="statActive">2</div>
+          <div class="stat-label">Active</div>
+        </div>
+      </div>
+
+      <!-- Module grid -->
+      <div class="section-header">
+        <span class="section-title">Automation Modules</span>
+      </div>
+      <div class="module-grid" id="moduleGrid">
+        <div class="module-skeleton"></div>
+        <div class="module-skeleton"></div>
+      </div>
+
+      <!-- Recent runs -->
+      <div class="section-header" style="margin-top:36px">
+        <span class="section-title">Recent Activity</span>
+      </div>
+      <div class="activity-list" id="activityList">
+        <div class="activity-empty">No runs yet this session.</div>
+      </div>
+    </div>
+
+    <!-- ── Module view (injected dynamically) ── -->
+    <div id="view-module" class="view">
+      <!-- filled by renderModuleView() -->
+    </div>
+
+  </div>
+
+  <!-- ══ CHROME MODAL ══ -->
+  <div class="overlay" id="chromeOverlay" style="display:none">
+    <div class="modal">
+      <div class="modal-icon">🌐</div>
+      <h2 class="modal-title">Connect Automation Chrome</h2>
+      <p class="modal-body">
+        This opens a separate <strong>Automation Chrome</strong> window using
+        <span id="modalUserDesc">your sessions</span> — Jive, LeadPerfection, and SharePoint are already signed in. No re-login needed.
+      </p>
+      <p class="modal-body" style="margin-top:10px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:10px; color:#166534;">
+        ✅ Your regular Chrome stays open. The automation runs in its own dedicated window that closes when the run is done.
+      </p>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn-primary" id="launchModalBtn" onclick="doLaunchChrome()">
+          Open Automation Chrome
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SETTINGS MODAL ══ -->
+  <div class="overlay" id="settingsOverlay" style="display:none">
+    <div class="modal">
+      <div class="modal-icon">⚙️</div>
+      <h2 class="modal-title">User Settings</h2>
+      <p class="modal-body" style="margin-bottom:16px">
+        Your name and email are used in the Chrome connection modal and the greeting. Each person sets this for themselves — it's saved in your browser only.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Your Name</label>
+          <input id="settingsName" placeholder="e.g. Junjun" style="width:100%;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none" />
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Automation Chrome Email</label>
+          <input id="settingsEmail" placeholder="e.g. you@gmail.com" style="width:100%;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
+        <button class="btn-primary" onclick="saveSettings()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
