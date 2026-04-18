@@ -1303,11 +1303,18 @@ async function ceProcess() {
       throw new Error(err.error || 'Server error');
     }
 
-    ceZipBlob = await res.blob();
+    const payload = await res.json();
+
+    // Decode base64 zip → Blob for download
+    const zipBytes  = Uint8Array.from(atob(payload.zip_b64), c => c.charCodeAt(0));
+    ceZipBlob = new Blob([zipBytes], { type: 'application/zip' });
 
     if (statusPill) { statusPill.textContent = 'Done'; statusPill.className = 'log-pill done'; }
     if (statusMsg)  statusMsg.textContent = '✅ PDFs processed successfully!';
     if (btn) btn.style.display = 'none';
+
+    // ── Show alerts if any ────────────────────────────────────────────────────
+    ceShowAlerts(payload.alerts || [], payload.is_sean || false, payload.summary || {});
 
     const downloadCard = document.getElementById('ceDownloadCard');
     if (downloadCard) downloadCard.style.display = 'block';
@@ -1336,6 +1343,79 @@ function ceDownload() {
 function ceReset() {
   ceZipBlob = null;
   renderCommEstimateModule();
+}
+
+function ceShowAlerts(alerts, isSean, summary) {
+  // Remove any existing alert card
+  document.getElementById('ceAlertCard')?.remove();
+  if (!alerts.length && !isSean) return;
+
+  const card = document.createElement('div');
+  card.id = 'ceAlertCard';
+  card.className = 'run-panel';
+  card.style.cssText = 'border:2px solid #f59e0b;background:#fffbeb';
+
+  let html = `<div class="run-panel-header" style="padding:13px 22px;background:#fef3c7">
+    <span class="run-panel-title" style="color:#92400e">⚠️ Action Required</span>
+  </div>
+  <div style="padding:14px 22px 18px;display:flex;flex-direction:column;gap:10px">`;
+
+  // Alert rows (inform Anne)
+  if (alerts.length) {
+    html += `<div style="display:flex;flex-direction:column;gap:6px">`;
+    alerts.forEach(a => {
+      html += `<div style="display:flex;align-items:flex-start;gap:8px;background:#fef9c3;border:1px solid #fde047;border-radius:8px;padding:10px 12px">
+        <span style="font-size:18px;line-height:1.2">🔔</span>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#78350f">${a}</div>
+          <div style="font-size:11px;color:#92400e;margin-top:2px">Please inform Anne before proceeding.</div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Sean tier note
+  if (isSean) {
+    html += `<div style="display:flex;align-items:flex-start;gap:8px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 12px">
+      <span style="font-size:18px;line-height:1.2">ℹ️</span>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#1e40af">Sean Stern Commission Tiers Applied</div>
+        <div style="font-size:11px;color:#1e3a8a;margin-top:2px">
+          Rates used: ≥100% GL → 12% · ≥90% → 11% · ≥80% → 10% · ≥75% → 9% · &lt;75% → 5%
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // Summary values
+  if (Object.keys(summary).length) {
+    html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px">`;
+    const fields = [
+      ['profit_margin',  'Profit Margin'],
+      ['pct_greenline',  '% Greenline'],
+      ['commission_pct', 'Commission %'],
+      ['est_commission', 'Est. Commission'],
+    ];
+    fields.forEach(([key, label]) => {
+      if (!summary[key]) return;
+      const isAlert = (key === 'profit_margin' && parseInt(summary[key]) < 60)
+                   || (key === 'pct_greenline'  && parseInt(summary[key]) < 80);
+      html += `<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:7px 10px">
+        <div style="font-size:10px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.3px">${label}</div>
+        <div style="font-size:14px;font-weight:700;color:${isAlert ? '#dc2626' : '#0f172a'};margin-top:2px">${summary[key]}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `</div>`;
+  card.innerHTML = html;
+
+  // Insert before the download card
+  const downloadCard = document.getElementById('ceDownloadCard');
+  if (downloadCard) downloadCard.before(card);
+  else document.getElementById('ceStatusWrap')?.after(card);
 }
 
 function saveCeServerUrl() {

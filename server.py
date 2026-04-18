@@ -6,7 +6,7 @@ Central server for all automation modules.
 
 from flask import Flask, jsonify, request, Response, send_from_directory, send_file
 from flask_cors import CORS
-import json, threading, asyncio, uuid, subprocess, time, os, io, zipfile, tempfile
+import json, threading, asyncio, uuid, subprocess, time, os, io, zipfile, tempfile, base64, re as _re
 from pathlib import Path
 from datetime import datetime
 
@@ -519,23 +519,51 @@ def process_commission_estimate():
         if not output_pdfs:
             return jsonify({'error': 'No output PDFs were generated. Check that the input files are valid CRM PDFs.'}), 500
 
-        # Bundle into zip and return as bytes so we can clean up temp dir
+        # ── Parse stdout for alerts, Sean flag, and summary values ────────────
+        stdout = result.stdout or ''
+        alerts  = []
+        is_sean = False
+        summary = {}
+
+        for line in stdout.splitlines():
+            s = line.strip()
+            # Alerts section
+            if 'inform Anne' in s or ('⚠️' in s and '%' in s):
+                clean = s.lstrip('⚠️ -').strip()
+                if clean and clean not in alerts:
+                    alerts.append(clean)
+            # Sean detection
+            rep_m = _re.search(r'Rep\s*:\s*(.+)', s)
+            if rep_m and 'sean' in rep_m.group(1).lower():
+                is_sean = True
+            # Summary values
+            def _extract(label, key):
+                m = _re.search(rf'{label}\s*:\s*([^\n]+)', s, _re.IGNORECASE)
+                if m: summary[key] = m.group(1).strip()
+            _extract('Profit Margin', 'profit_margin')
+            _extract('% Greenline',   'pct_greenline')
+            _extract('Commission %',  'commission_pct')
+            _extract('Est\. Commission', 'est_commission')
+            _extract('Greenline(?!\s*%)', 'greenline')
+
+        # Bundle into zip → base64 so we can return JSON + metadata together
         zip_buf = io.BytesIO()
         with zipfile.ZipFile(zip_buf, 'w', zipfile.ZIP_DEFLATED) as zf:
             for pdf in output_pdfs:
                 zf.write(str(pdf), pdf.name)
         zip_buf.seek(0)
-        zip_bytes = zip_buf.read()
+        zip_b64 = base64.b64encode(zip_buf.read()).decode('utf-8')
 
         save_history({'module': 'commission_estimate', 'ran_at': datetime.now().isoformat(),
                       'status': 'success'})
 
-        return send_file(
-            io.BytesIO(zip_bytes),
-            as_attachment=True,
-            download_name='commission_estimate_processed.zip',
-            mimetype='application/zip',
-        )
+        return jsonify({
+            'ok':      True,
+            'zip_b64': zip_b64,
+            'alerts':  alerts,
+            'is_sean': is_sean,
+            'summary': summary,
+        })
 
     except subprocess.TimeoutExpired:
         return jsonify({'error': 'Processing timed out (>120 s). Check that the PDFs are not corrupted.'}), 500
