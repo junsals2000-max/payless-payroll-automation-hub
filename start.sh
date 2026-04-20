@@ -27,4 +27,4 @@ echo "  ✓ Open: http://localhost:5050"
 echo ""
 
 sleep 1 && open "http://localhost:5050" &
-python3 server.py
+python3 backend/server.py

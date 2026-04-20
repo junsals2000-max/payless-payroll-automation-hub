@@ -8,116 +8,137 @@
 </head>
 <body>
 
-  <!-- ══ SIDEBAR ══ -->
-  <aside class="sidebar">
-    <div class="sidebar-brand">
-      <img class="brand-logo" src="https://paylesskitchencabinets.com/wp-content/uploads/2021/07/Untitled-design-e1745405124506.png" alt="Payless Logo" />
-      <div class="brand-text">
-        <span class="brand-name">Automation Hub</span>
-        <span class="brand-sub">Payless Kitchens &amp; Baths</span>
+  <!-- ══ LOGIN OVERLAY (shown until authenticated) ══ -->
+  <div class="login-overlay" id="loginOverlay" style="display:none">
+    <div class="login-card">
+      <div class="login-logo-wrap">
+        <div class="login-logo-bg">
+          <img class="login-logo" src="https://paylesskitchencabinets.com/wp-content/uploads/2021/07/Untitled-design-e1745405124506.png" alt="Payless Logo" />
+        </div>
       </div>
+      <h1 class="login-title">Automation Hub</h1>
+      <p class="login-sub">Payless Kitchens &amp; Baths</p>
+
+      <div class="login-form">
+        <div class="login-field">
+          <label class="login-label">Username</label>
+          <input id="loginUsername" class="login-input" type="text" placeholder="Enter your username" autocomplete="username" />
+        </div>
+        <div class="login-field">
+          <label class="login-label">Password</label>
+          <input id="loginPassword" class="login-input" type="password" placeholder="Enter your password" autocomplete="current-password" />
+        </div>
+
+        <div id="loginError" class="login-error" style="display:none"></div>
+
+        <button id="loginBtn" class="login-btn" onclick="doLogin()">Sign In</button>
+      </div>
+
+      <p class="login-footer">Contact Jun to get you an account.</p>
     </div>
-
-    <nav class="sidebar-nav">
-      <button class="nav-item active" onclick="showView('dashboard')" id="nav-dashboard">
-        <span class="nav-icon">⊞</span> Dashboard
-      </button>
-      <div class="nav-section-label">Modules</div>
-      <button class="nav-item" onclick="openModule('rehash')" id="nav-rehash">
-        <span class="nav-icon">📊</span> Sales Report
-      </button>
-      <button class="nav-item nav-disabled" id="nav-coordinator">
-        <span class="nav-icon">📋</span> Project Coordinator
-        <span class="nav-badge">Soon</span>
-      </button>
-      <button class="nav-item nav-disabled" id="nav-marketing">
-        <span class="nav-icon">📣</span> Marketing Report
-        <span class="nav-badge">Soon</span>
-      </button>
-      <button class="nav-item nav-disabled" id="nav-scheduling">
-        <span class="nav-icon">📅</span> Scheduling Report
-        <span class="nav-badge">Soon</span>
-      </button>
-      <button class="nav-item nav-disabled" id="nav-recruiting">
-        <span class="nav-icon">🤝</span> Recruiting Report
-        <span class="nav-badge">Soon</span>
-      </button>
-      <button class="nav-item" onclick="openModule('commission')" id="nav-commission">
-        <span class="nav-icon">💵</span> Sales Commission
-      </button>
-      <button class="nav-item" onclick="openModule('commission_estimate')" id="nav-commission_estimate">
-        <span class="nav-icon">📈</span> Commission Estimate
-      </button>
-    </nav>
-
-    <div class="sidebar-footer">
-      <div class="chrome-pill" id="chromePill">
-        <span class="chrome-dot" id="chromeDot"></span>
-        <span id="chromeLabel">Automation Chrome</span>
-      </div>
-      <button class="settings-btn" onclick="openSettings()" title="User Settings">⚙ Settings</button>
-    </div>
-  </aside>
-
-  <!-- ══ MAIN ══ -->
-  <div class="main-wrap">
-
-    <!-- ── Dashboard view ── -->
-    <div id="view-dashboard" class="view active-view">
-      <header class="topbar">
-        <div>
-          <h1 class="page-title">Dashboard</h1>
-          <p class="page-sub" id="greetingLine">Welcome back</p>
-        </div>
-        <div class="topbar-right">
-          <div class="date-chip" id="dateChip"></div>
-        </div>
-      </header>
-
-      <!-- Stats row -->
-      <div class="stats-row" id="statsRow">
-        <div class="stat-card">
-          <div class="stat-val" id="statTotal">—</div>
-          <div class="stat-label">Total Runs</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-val green" id="statSuccess">—</div>
-          <div class="stat-label">Successful</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-val" id="statModules">7</div>
-          <div class="stat-label">Modules</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-val blue" id="statActive">2</div>
-          <div class="stat-label">Active</div>
-        </div>
-      </div>
-
-      <!-- Module grid -->
-      <div class="section-header">
-        <span class="section-title">Automation Modules</span>
-      </div>
-      <div class="module-grid" id="moduleGrid">
-        <div class="module-skeleton"></div>
-        <div class="module-skeleton"></div>
-      </div>
-
-      <!-- Recent runs -->
-      <div class="section-header" style="margin-top:36px">
-        <span class="section-title">Recent Activity</span>
-      </div>
-      <div class="activity-list" id="activityList">
-        <div class="activity-empty">No runs yet this session.</div>
-      </div>
-    </div>
-
-    <!-- ── Module view (injected dynamically) ── -->
-    <div id="view-module" class="view">
-      <!-- filled by renderModuleView() -->
-    </div>
-
   </div>
+
+  <!-- ══ HUB BODY (hidden until authenticated) ══ -->
+  <div id="hubBody" style="display:none">
+
+    <!-- ── SIDEBAR ── -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <img class="brand-logo" src="https://paylesskitchencabinets.com/wp-content/uploads/2021/07/Untitled-design-e1745405124506.png" alt="Payless Logo" />
+        <div class="brand-text">
+          <span class="brand-name">Automation Hub</span>
+          <span class="brand-sub">Payless Kitchens &amp; Baths</span>
+        </div>
+      </div>
+
+      <!-- Nav is built dynamically by buildNav() after login -->
+      <nav class="sidebar-nav" id="sidebarNav"></nav>
+
+      <!-- Footer is rebuilt by buildNav() too -->
+      <div class="sidebar-footer" id="sidebarFooter">
+        <div class="chrome-pill" id="chromePill">
+          <span class="chrome-dot" id="chromeDot"></span>
+          <span id="chromeLabel">Automation Chrome</span>
+        </div>
+        <div style="display:flex;gap:6px;justify-content:center">
+          <button class="settings-btn" onclick="openSettings()" title="Settings" style="flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px">
+            <span style="font-size:18px;line-height:1">⚙</span>
+            <span style="font-size:10px;font-weight:600;letter-spacing:.3px;opacity:.8">Settings</span>
+          </button>
+          <button class="settings-btn" onclick="doLogout()" title="Log out" style="flex:1;text-align:center;color:#f87171;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px">
+            <span style="font-size:18px;line-height:1">⏻</span>
+            <span style="font-size:10px;font-weight:600;letter-spacing:.3px;opacity:.8">Log Out</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── MAIN ── -->
+    <div class="main-wrap">
+
+      <!-- Dashboard view -->
+      <div id="view-dashboard" class="view active-view">
+        <header class="topbar">
+          <div>
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-sub" id="greetingLine">Welcome back</p>
+          </div>
+          <div class="topbar-right">
+            <div class="date-chip" id="dateChip"></div>
+          </div>
+        </header>
+
+        <!-- Stats row -->
+        <div class="stats-row" id="statsRow">
+          <div class="stat-card">
+            <div class="stat-val" id="statTotal">—</div>
+            <div class="stat-label">Total Runs</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val green" id="statSuccess">—</div>
+            <div class="stat-label">Successful</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" id="statModules">—</div>
+            <div class="stat-label">Modules</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val blue" id="statActive">—</div>
+            <div class="stat-label">Active</div>
+          </div>
+        </div>
+
+        <!-- Module grid -->
+        <div class="section-header">
+          <span class="section-title">Automation Modules</span>
+        </div>
+        <div class="module-grid" id="moduleGrid">
+          <div class="module-skeleton"></div>
+          <div class="module-skeleton"></div>
+        </div>
+
+        <!-- Recent runs -->
+        <div class="section-header" style="margin-top:36px">
+          <span class="section-title">Recent Activity</span>
+        </div>
+        <div class="activity-list" id="activityList">
+          <div class="activity-empty">No runs yet this session.</div>
+        </div>
+      </div>
+
+      <!-- Module view (injected dynamically) -->
+      <div id="view-module" class="view">
+        <!-- filled by renderModuleView() -->
+      </div>
+
+      <!-- Admin view (injected dynamically by renderAdminPanel()) -->
+      <div id="view-admin" class="view">
+        <!-- filled by renderAdminPanel() -->
+      </div>
+
+    </div><!-- /main-wrap -->
+  </div><!-- /hubBody -->
+
 
   <!-- ══ CHROME MODAL ══ -->
   <div class="overlay" id="chromeOverlay" style="display:none">
@@ -142,26 +163,58 @@
 
   <!-- ══ SETTINGS MODAL ══ -->
   <div class="overlay" id="settingsOverlay" style="display:none">
-    <div class="modal">
-      <div class="modal-icon">⚙️</div>
-      <h2 class="modal-title">User Settings</h2>
-      <p class="modal-body" style="margin-bottom:16px">
-        Your name and email are used in the Chrome connection modal and the greeting. Each person sets this for themselves — it's saved in your browser only.
-      </p>
-      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+    <div class="modal" style="text-align:left">
+      <div style="text-align:center;margin-bottom:20px">
+        <div class="modal-icon">⚙️</div>
+        <h2 class="modal-title">Settings</h2>
+        <p style="font-size:12px;color:var(--text-3)">Signed in as <strong id="settingsUsername"></strong></p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:18px;margin-bottom:20px">
+
+        <!-- Server URL -->
         <div>
-          <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Your Name</label>
-          <input id="settingsName" placeholder="e.g. Junjun" style="width:100%;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none" />
+          <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Server URL</label>
+          <input id="settingsApiUrl" class="login-input" placeholder="http://localhost:5050" style="width:100%;font-size:13px" />
+          <p style="font-size:11px;color:var(--text-3);margin-top:4px">The address of the automation server running on the host machine.</p>
+          <span id="settingsUrlStatus" style="font-size:11px;font-weight:600"></span>
         </div>
+
+        <!-- Divider -->
+        <div style="border-top:1px solid var(--border)"></div>
+
+        <!-- Change Password -->
         <div>
-          <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Automation Chrome Email</label>
-          <input id="settingsEmail" placeholder="e.g. you@gmail.com" style="width:100%;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none" />
+          <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px">Change Password</label>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <input id="settingsCurPw"  class="login-input" type="password" placeholder="Current password"  style="width:100%;font-size:13px" />
+            <input id="settingsNewPw"  class="login-input" type="password" placeholder="New password"      style="width:100%;font-size:13px" />
+            <input id="settingsConfPw" class="login-input" type="password" placeholder="Confirm new password" style="width:100%;font-size:13px" />
+            <div id="settingsPwError"  style="display:none;font-size:12px;color:#ef4444;background:#fef2f2;border:1px solid #fecaca;border-radius:7px;padding:8px 12px"></div>
+            <button onclick="changeOwnPassword()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;cursor:pointer">Update Password</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-actions" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <button class="btn-secondary" onclick="doLogout()" style="color:#ef4444;border-color:#fca5a5">Log Out</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
+          <button class="btn-primary" onclick="saveSettings()">Save URL</button>
         </div>
       </div>
-      <div class="modal-actions">
-        <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
-        <button class="btn-primary" onclick="saveSettings()">Save</button>
-      </div>
+    </div>
+  </div>
+
+  <!-- ══ CUSTOM MODAL (replaces alert/confirm/prompt) ══ -->
+  <div class="overlay" id="customModalOverlay" style="display:none;z-index:999">
+    <div class="modal custom-modal" id="customModalBox">
+      <div class="custom-modal-icon" id="customModalIcon"></div>
+      <h2 class="modal-title" id="customModalTitle"></h2>
+      <p class="modal-body" id="customModalMessage"></p>
+      <div id="customModalExtra"></div>
+      <div class="modal-actions" id="customModalActions" style="margin-top:22px"></div>
     </div>
   </div>
 

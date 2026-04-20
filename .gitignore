@@ -8,11 +8,16 @@ __pycache__/
 run_history.json
 commission_config.json
 
+# Database & secrets (contains user accounts & passwords)
+data/
+*.db
+.env
+
 # OS
 .DS_Store
 
 # Claude internal
 .claude/
 
-# ngrok
+# ngrok / cloudflare
 *.log
